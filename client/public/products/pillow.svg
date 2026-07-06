@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="300" viewBox="0 0 400 300">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#F4A261"/>
+      <stop offset="100%" style="stop-color:#E76F51"/>
+    </linearGradient>
+  </defs>
+  <rect width="400" height="300" fill="url(#bg)" rx="8"/>
+  <text x="200" y="110" text-anchor="middle" font-size="64" font-family="sans-serif" fill="white" opacity="0.95">🛏️</text>
+  <text x="200" y="170" text-anchor="middle" font-size="16" font-family="sans-serif" font-weight="600" fill="white" opacity="0.95">记忆棉颈椎枕</text>
+  <text x="200" y="196" text-anchor="middle" font-size="11" font-family="sans-serif" fill="white" opacity="0.45">LuckyShop</text>
+</svg>

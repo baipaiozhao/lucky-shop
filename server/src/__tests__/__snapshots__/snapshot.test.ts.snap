@@ -1,0 +1,24 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Coupon utilities — snapshot regression calcCouponDiscount snapshots 1`] = `
+[
+  500,
+  0,
+  2000,
+  3000,
+  0,
+]
+`;
+
+exports[`Coupon utilities — snapshot regression findBestCoupon snapshots 1`] = `
+{
+  "coupon": {
+    "amount": 20,
+    "id": "c",
+    "minSpend": 20000,
+    "name": "20%",
+    "type": "percentage",
+  },
+  "discount": 6000,
+}
+`;

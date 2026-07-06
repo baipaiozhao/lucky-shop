@@ -1,0 +1,15 @@
+dist
+build
+node_modules
+coverage
+*.lock
+package-lock.json
+yarn.lock
+
+.eslint-report.json
+lint-report.json
+lint-current.txt
+direct.out
+out.txt
+err.txt
+*.tsbuildinfo

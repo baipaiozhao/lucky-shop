@@ -1,0 +1,10 @@
+.memory-card {
+  transition: transform 0.3s ease, background 0.3s ease;
+}
+.memory-card.flipped {
+  transform: rotateY(180deg);
+}
+.memory-card.matched {
+  border-color: #06D6A050 !important;
+  box-shadow: 0 0 8px #06D6A0;
+}

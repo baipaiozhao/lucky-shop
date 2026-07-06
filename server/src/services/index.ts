@@ -1,0 +1,12 @@
+﻿export { BaseService } from "./base.service";
+export { authService } from "./auth.service";
+export { productService } from "./product.service";
+export { orderService } from "./order.service";
+export { gameService } from "./game.service";
+export { inviteService } from "./invite.service";
+export { cartService } from "./cart.service";
+export { userAddressService } from "./user-address.service";
+export { adminService } from "./admin.service";
+export { prizeService } from "./prize.service";
+export { favoriteService } from "./favorite.service";
+export { checkinService } from "./checkin.service";

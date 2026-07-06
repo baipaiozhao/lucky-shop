@@ -1,0 +1,53 @@
+
+const { PrismaClient } = require("@prisma/client");
+const p = new PrismaClient();
+
+const svgMap = {
+  "???????? Pro": "wireless-earphone.svg",
+  "???? ?? 87?": "mechanical-keyboard.svg",
+  "????? 20000mAh": "powerbank.svg",
+  "Type-C ??? 7?1": "usb-hub.svg",
+  "?????? ??": "phone-cooler.svg",
+  "???? ????": "smartwatch.svg",
+  "?????? T?": "tshirt.svg",
+  "?????? UPF50+": "jacket.svg",
+  "????? ???": "jeans.svg",
+  "????? ????": "sneakers.svg",
+  "????? 30ml": "serum.svg",
+  "??? SPF50+ PA++++": "sunscreen.svg",
+  "???? ???": "lipstick.svg",
+  "???? ?????": "nuts.svg",
+  "???? ???? 20?": "coffee.svg",
+  "??????? 16?": "chocolate.svg",
+  "?????? 500ml": "diffuser.svg",
+  "??????": "pillow.svg",
+  "?? ??LED ????": "lamp.svg",
+  "JavaScript?????? ?4?": "js-book.svg",
+  "?????? ???": "design-book.svg",
+  "???? ?????": "phone-stand.svg",
+  "??? Type-C 1?": "usb-cable.svg",
+  "????? ??": "tote-bag.svg",
+};
+
+async function main() {
+  const allProducts = await p.product.findMany({ include: { category: true } });
+  const nameToId = {};
+  allProducts.forEach(pr => { nameToId[pr.name] = pr.id; });
+
+  let updated = 0;
+  for (const [name, svgFile] of Object.entries(svgMap)) {
+    const id = nameToId[name];
+    if (id) {
+      await p.product.update({
+        where: { id: id },
+        data: { images: JSON.stringify(["/products/" + svgFile]) }
+      });
+      process.stdout.write("  OK: " + name + " -> " + svgFile + "\n");
+      updated++;
+    }
+  }
+  process.stdout.write("Updated: " + updated + "/" + Object.keys(svgMap).length + "\n");
+  await p.$disconnect();
+}
+
+main().catch(e => { console.error(e); process.exit(1); });

@@ -1,0 +1,68 @@
+# Dependencies
+node_modules/
+*/node_modules/
+
+# Build outputs
+dist/
+build/
+*/dist/
+*/build/
+
+# Environment
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+server/logs/
+
+# Prisma
+prisma/dev.db
+prisma/dev.db-journal
+prisma/migrations/dev_*/
+
+# Uploads
+server/uploads/*
+!server/uploads/.gitkeep
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Test coverage
+coverage/
+*.lcov
+
+# Generated reports and command captures
+.eslint-report.json
+lint-report.json
+lint-current.txt
+direct.out
+out.txt
+err.txt
+
+# TypeScript build metadata
+*.tsbuildinfo
+
+# Cache
+.cache/
+.parcel-cache/
+.eslintcache
+
+# Misc
+*.tgz
+.pnp.*
+
+# Docker secrets
+.secrets/

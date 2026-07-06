@@ -1,0 +1,97 @@
+﻿version: "3.8"
+
+services:
+  # === Redis (Cache & Sessions) ===
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # === PostgreSQL (Production Database) ===
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: wo_mai_wo_mai
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-changeme}
+      POSTGRES_DB: wo_mai_wo_mai
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U wo_mai_wo_mai"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # === Backend API ===
+  backend:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    ports:
+      - "4000:4000"
+    environment:
+      - NODE_ENV=production
+      - DATABASE_PROVIDER=postgresql
+      - REDIS_URL=redis://redis:6379
+      - DATABASE_URL=postgresql://wo_mai_wo_mai:${DB_PASSWORD:-changeme}@postgres:5432/wo_mai_wo_mai?schema=public
+      - DB_POOL_MAX=20
+      - DB_POOL_MIN=2
+      - JWT_SECRET_FILE=/run/secrets/jwt_secret
+      - PORT=4000
+      - CORS_ORIGIN=http://localhost:3000
+    volumes:
+      - uploads:/app/uploads
+    secrets:
+      - jwt_secret
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:4000/api/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+    restart: unless-stopped
+    command: >
+      sh -c "npx prisma migrate deploy && node dist/index.js"
+
+  # === Frontend (Nginx + React SPA) ===
+  frontend:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    ports:
+      - "3000:80"
+    environment:
+      - VITE_API_BASE_URL=http://backend:4000/api
+    depends_on:
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:80/"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    restart: unless-stopped
+
+secrets:
+  jwt_secret:
+    file: ./.secrets/jwt_secret.txt
+
+volumes:
+  redisdata:
+  pgdata:
+  uploads:

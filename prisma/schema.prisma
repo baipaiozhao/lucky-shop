@@ -1,0 +1,478 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Achievement {
+  id              String            @id @default(cuid())
+  key             String            @unique
+  name            String
+  description     String
+  icon            String
+  condition       String
+  reward          String
+  category        String
+  sort            Int               @default(0)
+  isActive        Boolean           @default(true)
+  createdAt       DateTime          @default(now())
+  UserAchievement UserAchievement[]
+}
+
+model Address {
+  id        String   @id @default(cuid())
+  userId    String
+  name      String
+  phone     String
+  province  String
+  city      String
+  district  String
+  detail    String
+  isDefault Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  Order     Order[]
+
+  @@index([userId])
+}
+
+model AnalyticsEvent {
+  id         String   @id @default(cuid())
+  userId     String?
+  sessionId  String
+  event      String
+  properties String
+  createdAt  DateTime @default(now())
+
+  @@index([sessionId])
+  @@index([event, createdAt])
+  @@index([userId, createdAt])
+}
+
+model CartItem {
+  id        String   @id @default(cuid())
+  userId    String
+  productId String
+  quantity  Int      @default(1)
+  selected  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, productId])
+  @@index([userId])
+}
+
+model Category {
+  id        String    @id @default(cuid())
+  name      String    @unique
+  icon      String?
+  sort      Int       @default(0)
+  isActive  Boolean   @default(true)
+  createdAt DateTime  @default(now())
+  Product   Product[]
+}
+
+model CheckIn {
+  id        String   @id @default(cuid())
+  userId    String
+  checkDate DateTime @default(now())
+  dayIndex  Int
+  reward    String
+  points    Int      @default(0)
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, checkDate])
+  @@index([userId, checkDate])
+}
+
+model Coupon {
+  id          String       @id @default(cuid())
+  name        String
+  type        String
+  amount      Decimal
+  minSpend    Decimal      @default(0)
+  maxDiscount Decimal?
+  validDays   Int          @default(30)
+  totalQuota  Int?
+  usedCount   Int          @default(0)
+  description String?
+  isActive    Boolean      @default(true)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime @updatedAt
+  CouponRule  CouponRule?
+  UserCoupon  UserCoupon[]
+}
+
+model CouponRule {
+  id              String  @id @default(cuid())
+  couponId        String  @unique
+  conditions      String
+  priority        Int     @default(0)
+  stackable       Boolean @default(false)
+  exclusiveGroups String?
+  isActive        Boolean @default(true)
+  Coupon          Coupon  @relation(fields: [couponId], references: [id], onDelete: Cascade)
+}
+
+model Favorite {
+  id        String   @id @default(cuid())
+  userId    String
+  productId String
+  createdAt DateTime @default(now())
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, productId])
+  @@index([userId, createdAt])
+  @@index([userId])
+}
+
+model FeatureFlag {
+  id          String   @id @default(cuid())
+  key         String   @unique
+  name        String
+  description String
+  enabled     Boolean  @default(true)
+  rollout     Int      @default(100)
+  metadata    String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model GameRecord {
+  id          String      @id @default(cuid())
+  userId      String
+  sessionId   String      @unique
+  gameType    String
+  difficulty  String
+  score       Int         @default(0)
+  passed      Boolean     @default(false)
+  duration    Int?
+  prizeId     String?
+  metadata    String?
+  createdAt   DateTime    @default(now())
+  prize         Prize?    @relation(fields: [prizeId], references: [id])
+  GameSession GameSession @relation(fields: [sessionId], references: [id])
+  user          User      @relation(fields: [userId], references: [id])
+
+  @@index([userId, gameType])
+  @@index([gameType, passed])
+  @@index([userId, createdAt])
+}
+
+model GameSession {
+  id             String      @id @default(cuid())
+  userId         String
+  orderId        String
+  gameType       String
+  difficulty     String
+  status         String      @default("started")
+  rngSeed        String      @unique
+  serverNonce    String
+  configSnapshot String
+  resultSnapshot String?
+  clientChecksum String?
+  startedAt      DateTime    @default(now())
+  completedAt    DateTime?
+  expiresAt      DateTime
+  GameRecord     GameRecord?
+  Order          Order       @relation(fields: [orderId], references: [id])
+  user          User      @relation(fields: [userId], references: [id])
+
+  @@index([expiresAt])
+  @@index([orderId])
+  @@index([userId, status])
+}
+
+model Invitation {
+  id                              String    @id @default(cuid())
+  inviterId                       String
+  inviteeId                       String?   @unique
+  code                            String    @unique
+  status                          String    @default("pending")
+  rewardGiven                     Boolean   @default(false)
+  createdAt                       DateTime  @default(now())
+  completedAt                     DateTime?
+  User_Invitation_inviteeIdToUser User?     @relation("Invitation_inviteeIdToUser", fields: [inviteeId], references: [id])
+  User_Invitation_inviterIdToUser User      @relation("Invitation_inviterIdToUser", fields: [inviterId], references: [id])
+
+  @@index([status])
+  @@index([inviterId])
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  type      String
+  title     String
+  body      String
+  data      String?
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, read, createdAt])
+}
+
+model Order {
+  id              String        @id @default(cuid())
+  orderNo         String        @unique
+  userId          String
+  totalAmount     Decimal
+  discount        Decimal       @default(0)
+  finalAmount     Decimal
+  status          String        @default("pending")
+  paymentMethod   String        @default("mock")
+  addressId       String
+  couponIds       String?
+  pointsUsed      Int           @default(0)
+  pointsValue     Decimal       @default(0)
+  gameChances     Int           @default(1)
+  gameChancesUsed Int           @default(0)
+  trackingNo      String?
+  carrier         String?
+  remark          String?
+  paidAt          DateTime?
+  shippedAt       DateTime?
+  completedAt     DateTime?
+  cancelledAt     DateTime?
+  cancelReason    String?
+  idempotencyKey  String?       @unique
+  version         Int           @default(1)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime @updatedAt
+  gameSessions   GameSession[]
+  address         Address       @relation(fields: [addressId], references: [id])
+  user          User      @relation(fields: [userId], references: [id])
+  items           OrderItem[]
+
+  @@index([createdAt])
+  @@index([status, createdAt])
+  @@index([userId, status])
+}
+
+model OrderItem {
+  id           String  @id @default(cuid())
+  orderId      String
+  productId    String
+  productName  String
+  productImage String
+  price        Decimal
+  quantity     Int
+  subtotal     Decimal
+  product      Product @relation(fields: [productId], references: [id])
+  order        Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([productId])
+  @@index([orderId])
+}
+
+model PointsTransaction {
+  id        String   @id @default(cuid())
+  userId    String
+  amount    Int
+  type      String
+  source    String
+  refId     String?
+  remark    String?
+  createdAt DateTime @default(now())
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, type])
+  @@index([userId, createdAt])
+}
+
+model Prize {
+  id          String       @id @default(cuid())
+  name        String
+  type        String
+  tier        String
+  value       Decimal
+  description String
+  image       String?
+  stock       Int          @default(0)
+  probability Decimal
+  isActive    Boolean      @default(true)
+  sort        Int          @default(0)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime @updatedAt
+  GameRecord  GameRecord[]
+  UserPrize   UserPrize[]
+}
+
+model Product {
+  id                                              String            @id @default(cuid())
+  name                                            String
+  description                                     String
+  detail                                          String?
+  price                                           Decimal
+  originalPrice                                   Decimal?
+  images                                          String
+  categoryId                                      String
+  stock                                           Int               @default(0)
+  sales                                           Int               @default(0)
+  rating                                          Float             @default(5.0)
+  reviewCount                                     Int               @default(0)
+  isActive                                        Boolean           @default(true)
+  isFeatured                                      Boolean           @default(false)
+  isNew                                           Boolean           @default(false)
+  tags                                            String?
+  sort                                            Int               @default(0)
+  version                                         Int               @default(1)
+  createdAt                                       DateTime          @default(now())
+  updatedAt                                       DateTime @updatedAt
+  deletedAt                                       DateTime?
+  CartItem                                        CartItem[]
+  Favorite                                        Favorite[]
+  OrderItem                                       OrderItem[]
+  category                                        Category          @relation(fields: [categoryId], references: [id])
+  ProductRelation_ProductRelation_toIdToProduct   ProductRelation[] @relation("ProductRelation_toIdToProduct")
+  ProductRelation_ProductRelation_fromIdToProduct ProductRelation[] @relation("ProductRelation_fromIdToProduct")
+  Review                                          Review[]
+
+  @@index([price])
+  @@index([sales])
+  @@index([isNew, sort])
+  @@index([isFeatured, sort])
+  @@index([categoryId, isActive])
+}
+
+model ProductRelation {
+  id                                      String  @id @default(cuid())
+  fromId                                  String
+  toId                                    String
+  sort                                    Int     @default(0)
+  Product_ProductRelation_toIdToProduct   Product @relation("ProductRelation_toIdToProduct", fields: [toId], references: [id], onDelete: Cascade)
+  Product_ProductRelation_fromIdToProduct Product @relation("ProductRelation_fromIdToProduct", fields: [fromId], references: [id], onDelete: Cascade)
+
+  @@unique([fromId, toId])
+  @@index([fromId])
+}
+
+model Review {
+  id          String   @id @default(cuid())
+  userId      String
+  productId   String
+  orderId     String
+  rating      Int
+  content     String
+  images      String?
+  isAnonymous Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  Product     Product  @relation(fields: [productId], references: [id])
+  user          User      @relation(fields: [userId], references: [id])
+
+  @@unique([userId, orderId, productId])
+  @@index([productId, createdAt])
+}
+
+model ShareRecord {
+  id        String   @id @default(cuid())
+  userId    String
+  type      String
+  refId     String
+  channel   String?
+  createdAt DateTime @default(now())
+  user          User      @relation(fields: [userId], references: [id])
+
+  @@index([userId, createdAt])
+  @@index([userId, type])
+}
+
+model User {
+  id                                    String              @id @default(cuid())
+  username                              String              @unique
+  email                                 String              @unique
+  password                              String
+  phone                                 String?
+  role                                  String              @default("user")
+  avatar                                String?
+  status                                String              @default("active")
+  points                                Int                 @default(0)
+  lastLoginAt                           DateTime?
+  createdAt                             DateTime            @default(now())
+  updatedAt                             DateTime @updatedAt
+  deletedAt                             DateTime?
+  Address                               Address[]
+  CartItem                              CartItem[]
+  CheckIn                               CheckIn[]
+  Favorite                              Favorite[]
+  GameRecord                            GameRecord[]
+  GameSession                           GameSession[]
+  Invitation_Invitation_inviteeIdToUser Invitation?         @relation("Invitation_inviteeIdToUser")
+  Invitation_Invitation_inviterIdToUser Invitation[]        @relation("Invitation_inviterIdToUser")
+  Notification                          Notification[]
+  Order                                 Order[]
+  PointsTransaction                     PointsTransaction[]
+  Review                                Review[]
+  ShareRecord                           ShareRecord[]
+  UserAchievement                       UserAchievement[]
+  UserCoupon                            UserCoupon[]
+  UserPrize                             UserPrize[]
+
+  @@index([role])
+  @@index([createdAt])
+  @@index([email])
+}
+
+model UserAchievement {
+  id            String      @id @default(cuid())
+  userId        String
+  achievementId String
+  progress      Int         @default(0)
+  target        Int         @default(1)
+  completed     Boolean     @default(false)
+  completedAt   DateTime?
+  createdAt     DateTime    @default(now())
+  Achievement   Achievement @relation(fields: [achievementId], references: [id])
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, achievementId])
+  @@index([userId, completed])
+}
+
+model UserCoupon {
+  id            String    @id @default(cuid())
+  userId        String
+  couponId      String
+  status        String    @default("unused")
+  lockedAt      DateTime?
+  lockedOrderId String?
+  expiredAt     DateTime
+  usedAt        DateTime?
+  usedOrderId   String?
+  createdAt     DateTime  @default(now())
+  coupon        Coupon    @relation(fields: [couponId], references: [id])
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([couponId])
+  @@index([status, expiredAt])
+  @@index([userId, status])
+}
+
+model UserPrize {
+  id           String    @id @default(cuid())
+  userId       String
+  prizeId      String
+  gameRecordId String?
+  status       String    @default("unclaimed")
+  addressId    String?
+  trackingNo   String?
+  carrier      String?
+  claimCode    String?   @unique
+  expiredAt    DateTime
+  claimedAt    DateTime?
+  shippedAt    DateTime?
+  createdAt    DateTime  @default(now())
+  prize         Prize      @relation(fields: [prizeId], references: [id])
+  user          User      @relation(fields: [userId], references: [id])
+
+  @@index([status, expiredAt])
+  @@index([userId, status])
+}
