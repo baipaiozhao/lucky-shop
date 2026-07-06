@@ -13,7 +13,10 @@
         "dev:server": "npm run dev --workspace=server",
         "dev:client": "npm run dev --workspace=client",
         "build": "npm run build --workspace=server && npm run build --workspace=client",
+        "build:server": "npm run build --workspace=server",
+        "build:client": "npm run build --workspace=client",
         "start": "npm run start --workspace=server",
+        "start:server": "npm run start --workspace=server",
         "lint": "eslint . --ext .ts,.tsx,.js --max-warnings 0",
         "lint:fix": "eslint . --ext .ts,.tsx,.js --fix",
         "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
@@ -24,9 +27,11 @@
         "test:client": "npm run test --workspace=client",
         "prisma:generate": "prisma generate --schema=prisma/schema.prisma",
         "prisma:migrate": "prisma migrate dev --schema=prisma/schema.prisma",
+        "prisma:migrate:prod": "prisma migrate deploy --schema=prisma/schema.prisma",
         "prisma:reset": "prisma migrate reset --schema=prisma/schema.prisma --force",
         "prisma:seed": "node --import tsx/esm prisma/seed.ts",
         "prisma:studio": "prisma studio --schema=prisma/schema.prisma",
+        "postinstall": "prisma generate",
         "clean": "rimraf node_modules client/node_modules server/node_modules client/dist server/dist"
     },
     "devDependencies": {
@@ -62,6 +67,6 @@
     ],
     "repository": {
         "type": "git",
-        "url": "https://github.com/username/lucky-shop"
+        "url": "https://github.com/baipaiozhao/lucky-shop"
     }
 }
